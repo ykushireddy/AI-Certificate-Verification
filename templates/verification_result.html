@@ -1,49 +1,45 @@
 
 {% extends "base.html" %}
-
 {% block title %}Verification Result | VeriCred AI{% endblock %}
-
 {% block content %}
-
 <div class="result-page">
-
     <div class="dashboard-header text-center mb-4">
         <p class="section-label mb-2">VERIFICATION REPORT</p>
         <h2>Certificate Verification Result</h2>
         <p class="text-muted">Review the certificate verification and blockchain details below.</p>
     </div>
-
     <div class="card dashboard-card result-card">
         <div class="card-body">
 
             {% if result == "VERIFIED" or result == "REGISTERED" %}
-                <div class="result-status result-success">
-                    <h3>✓ {{ result }}</h3>
-                    <p class="mb-0">The certificate is registered and its hash matches the blockchain record.</p>
-                </div>
-
+            <div class="result-status result-success">
+                <h3>✓ {{ result }}</h3>
+                <p class="mb-0">The certificate is registered and its hash matches the blockchain record.</p>
+            </div>
+            {% elif result == "NOT REGISTERED" %}
+            <div class="result-status result-warning">
+                <h3>⚠ NOT REGISTERED</h3>
+                <p class="mb-0">This certificate is not registered in our blockchain records. Its authenticity could not be confirmed.</p>
+            </div>
             {% elif result == "TAMPERED-MISMATCH" %}
-                <div class="result-status result-danger">
-                    <h3>✕ TAMPERED / HASH MISMATCH</h3>
-                    <p class="mb-0">The uploaded file does not match a registered certificate.</p>
-                </div>
-
+            <div class="result-status result-danger">
+                <h3>✕ TAMPERED / HASH MISMATCH</h3>
+                <p class="mb-0">The uploaded file does not match a registered certificate.</p>
+            </div>
             {% else %}
-                <div class="result-status result-warning">
-                    <h3>Certificate Not Found</h3>
-                    <p class="mb-0">No matching registered certificate was found.</p>
-                </div>
+            <div class="result-status result-warning">
+                <h3>Certificate Not Found</h3>
+                <p class="mb-0">No matching registered certificate was found.</p>
+            </div>
             {% endif %}
 
             <div class="result-section">
                 <h5 class="result-section-title">01. Certificate Information</h5>
-
                 <div class="result-details">
                     <div>
                         <span>Certificate ID</span>
                         <strong>{{ certificate_id or "Not available" }}</strong>
                     </div>
-
                     {% if certificate %}
                     <div>
                         <span>Student Name</span>
@@ -68,13 +64,11 @@
             {% if blockchain %}
             <div class="result-section">
                 <h5 class="result-section-title">02. Blockchain Information</h5>
-
                 <div class="result-details">
                     <div>
                         <span>Blockchain Status</span>
                         <strong>{{ blockchain['status'] }}</strong>
                     </div>
-
                     {% if blockchain.get('certificate_hash') %}
                     <div class="result-full-width">
                         <span>Registered SHA-256 Hash</span>
@@ -95,11 +89,12 @@
 
             {% if closest_match %}
             <div class="ai-closest">
-                <strong>AI match:</strong> this file is not registered, but it closely resembles
-                certificate <strong>{{ closest_match['certificate_id'] }}</strong>
+                <strong>AI match:</strong>
+                This file is not registered, but it closely resembles certificate
+                <strong>{{ closest_match['certificate_id'] }}</strong>
                 issued to <strong>{{ closest_match['student_name'] }}</strong>
-                ({{ closest_score }}% content match). It is probably an altered copy -
-                see the differences highlighted below.
+                ({{ closest_score }}% content match).
+                This similarity does not establish whether the certificate is genuine or altered.
             </div>
             {% endif %}
 
@@ -124,7 +119,6 @@
             {% set level = 'high' if risk >= 60 else ('medium' if risk >= 35 else 'low') %}
             <div class="result-section">
                 <h5 class="result-section-title">03. AI Analysis</h5>
-
                 <div class="ai-summary ai-level-{{ level }}">
                     <div class="ai-score">
                         <span class="ai-score-number">{{ risk }}</span>
@@ -132,7 +126,9 @@
                     </div>
                     <div class="ai-summary-text">
                         <strong>{{ analysis['status'] }} - {{ analysis['verdict'] }}</strong>
-                        <div class="ai-meter"><div style="width: {{ risk }}%"></div></div>
+                        <div class="ai-meter">
+                            <div style="width: {{ risk }}%"></div>
+                        </div>
                         <small class="text-muted">{{ analysis['analysis_type'] }}</small>
                     </div>
                 </div>
@@ -148,7 +144,9 @@
                     {% for name, value in analysis['check_scores'].items() %}
                     <div class="ai-check">
                         <span>{{ check_names.get(name, name) }}</span>
-                        <div class="ai-bar"><div class="{{ 'bar-high' if value >= 60 else ('bar-medium' if value >= 35 else 'bar-low') }}" style="width: {{ [value, 2]|max }}%"></div></div>
+                        <div class="ai-bar">
+                            <div class="{{ 'bar-high' if value >= 60 else ('bar-medium' if value >= 35 else 'bar-low') }}" style="width: {{ [value, 2]|max }}%"></div>
+                        </div>
                         <strong>{{ value }}%</strong>
                     </div>
                     {% endfor %}
@@ -159,7 +157,12 @@
                 <p class="result-label mt-4">Record vs. Document (fuzzy OCR match)</p>
                 <table class="table table-sm ai-table">
                     <thead>
-                        <tr><th>Field</th><th>On record</th><th>Found on document</th><th>Match</th></tr>
+                        <tr>
+                            <th>Field</th>
+                            <th>On record</th>
+                            <th>Found on document</th>
+                            <th>Match</th>
+                        </tr>
                     </thead>
                     <tbody>
                         {% for key, item in matching['fields'].items() %}
@@ -178,7 +181,9 @@
                 {% if text_model and text_model['signals'] %}
                 <p class="result-label mt-3">Words that raised the ML model's suspicion</p>
                 <div class="ai-signals">
-                    {% for signal in text_model['signals'] %}<span>{{ signal }}</span>{% endfor %}
+                    {% for signal in text_model['signals'] %}
+                    <span>{{ signal }}</span>
+                    {% endfor %}
                 </div>
                 {% endif %}
 
@@ -222,10 +227,8 @@
             {% if result == "REGISTERED" and certificate_hash %}
             <div class="result-section">
                 <h5 class="result-section-title">05. Registration Details</h5>
-
                 <span class="result-label">Certificate SHA-256 Hash</span>
                 <p class="hash-text">{{ certificate_hash }}</p>
-
                 <div class="result-details">
                     <div class="result-full-width">
                         <span>Blockchain Transaction</span>
@@ -247,5 +250,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}

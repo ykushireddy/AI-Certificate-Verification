@@ -198,6 +198,7 @@ def student_register():
 
     return render_template("student_register.html")
 
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -269,20 +270,17 @@ def upload_certificate():
             return redirect(url_for("upload_certificate"))
 
         filename = secure_filename(uploaded_file.filename)
-
         unique_filename = f"{uuid.uuid4().hex}_{filename}"
-
         file_path = config.UPLOAD_FOLDER / unique_filename
 
         uploaded_file.save(file_path)
         database_saved = False
+
         try:
             # STEP 1: OCR
             extracted_text = extract_text(file_path)
 
             # STEP 2: AI ANALYSIS
-            # (ML text model + file forensics + check the document
-            #  really shows the details the admin typed in)
             analysis = analyze_certificate(
                 extracted_text,
                 file_path=file_path,
@@ -304,7 +302,7 @@ def upload_certificate():
             # STEP 5: GENERATE QR CODE
             qr_path = generate_qr(certificate_id)
 
-            # STEP 6: SAVE PENDING RECORD IN SQLITE
+            # STEP 6: SAVE RECORD IN SQLITE
             database.save_certificate({
                 "certificate_id": certificate_id,
                 "student_id": student["id"] if student else None,
@@ -350,11 +348,9 @@ def upload_certificate():
 
         except Exception as error:
 
-            # Keep the record if blockchain registration succeeded.
-            # It may need a database transaction update retry.
             if "blockchain_result" not in locals():
 
-                if "database_saved" in locals() and database_saved:
+                if database_saved:
                     database.delete_certificate(certificate_id)
 
                 if "qr_path" in locals() and os.path.exists(qr_path):
@@ -372,7 +368,6 @@ def upload_certificate():
 # -------------------------------
 # STUDENT DASHBOARD
 # -------------------------------
-
 
 @app.route("/student/dashboard")
 @login_required
@@ -489,6 +484,7 @@ def student_submit_certificate():
 
     return render_template("student_submit_certificate.html")
 
+
 # -------------------------------
 # ADMIN: STUDENT SUBMISSIONS
 # -------------------------------
@@ -497,6 +493,7 @@ def student_submit_certificate():
 @login_required
 @role_required("admin")
 def admin_submissions():
+
     submissions = database.get_all_submissions()
 
     return render_template(
@@ -509,6 +506,7 @@ def admin_submissions():
 @login_required
 @role_required("admin")
 def admin_view_submission_file(submission_id):
+
     submission = database.get_submission_by_id(submission_id)
 
     if not submission:
@@ -526,6 +524,7 @@ def admin_view_submission_file(submission_id):
 @login_required
 @role_required("admin")
 def admin_review_submission(submission_id):
+
     submission = database.get_submission_by_id(submission_id)
 
     if not submission:
@@ -608,6 +607,7 @@ def admin_review_submission(submission_id):
         )
 
     except Exception as error:
+
         # Keep the student's submission pending if approval fails
         if certificate_saved:
             database.delete_certificate(certificate_id)
@@ -785,13 +785,16 @@ def verify():
                         extracted_text=extracted_text
                     )
 
-                # Not registered: find which registered certificate this
-                # file most resembles, so the AI can show what was changed
+                # File is not registered.
+                # Find a similar certificate only to provide an optional
+                # content comparison. Similarity does not prove alteration.
                 closest, closest_score = find_closest_certificate(
                     extracted_text,
                     database.get_all_certificates()
                 )
 
+                # Run AI analysis, but do not label the file as tampered
+                # just because its hash is not registered.
                 analysis = analyze_certificate(
                     extracted_text,
                     file_path=temp_path,
@@ -800,8 +803,10 @@ def verify():
 
                 return render_template(
                     "verification_result.html",
-                    result="TAMPERED-MISMATCH",
+                    result="NOT REGISTERED",
                     certificate_id=None,
+                    certificate=None,
+                    blockchain=None,
                     closest_match=closest,
                     closest_score=closest_score,
                     analysis=analysis,
