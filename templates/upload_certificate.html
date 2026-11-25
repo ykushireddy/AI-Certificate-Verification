@@ -1,0 +1,119 @@
+
+{% extends "base.html" %}
+
+{% block title %}Upload Certificate | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="upload-page">
+
+    <div class="dashboard-header mb-4">
+        <p class="section-label mb-1">CERTIFICATE MANAGEMENT</p>
+        <h2 class="mb-1">Upload Certificate</h2>
+        <p class="text-muted mb-0">
+            Enter the student's details and upload the original certificate document.
+        </p>
+    </div>
+
+    <div class="card dashboard-card upload-card">
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="form-section">
+                    <h5 class="form-section-title">01. Certificate Information</h5>
+                    <p class="text-muted small mb-4">
+                        Enter the details exactly as they appear on the certificate.
+                    </p>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Student Name <span class="required-mark">*</span></label>
+                            <input type="text" name="student_name"
+                                   class="form-control" placeholder="Enter student's full name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Course <span class="required-mark">*</span></label>
+                            <input type="text" name="course"
+                                   class="form-control" placeholder="e.g. Computer Science" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">College / University <span class="required-mark">*</span></label>
+                            <input type="text" name="college"
+                                   class="form-control" placeholder="Enter institution name" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Year <span class="required-mark">*</span></label>
+                            <input type="number" name="year"
+                                   class="form-control" min="1950" max="2100"
+                                   placeholder="e.g. 2026" required>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Register Number</label>
+                            <input type="text" name="register_number"
+                                   class="form-control" placeholder="Enter university register number">
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h5 class="form-section-title">02. Student Account Linking</h5>
+                    <p class="text-muted small mb-3">
+                        Optionally link this certificate to an existing student account.
+                    </p>
+
+                    <label class="form-label">Student Login Username</label>
+                    <input type="text" name="student_username"
+                           class="form-control" placeholder="Example: student">
+
+                    <small class="form-text text-muted">
+                        Leave blank if the certificate should not be linked to a student account.
+                    </small>
+                </div>
+
+                <div class="form-section">
+                    <h5 class="form-section-title">03. Certificate Document</h5>
+                    <p class="text-muted small mb-3">
+                        Upload the original certificate for OCR analysis and verification.
+                    </p>
+
+                    <label class="form-label">
+                        Select Certificate <span class="required-mark">*</span>
+                    </label>
+
+                    <input type="file" name="certificate"
+                           class="form-control"
+                           accept=".pdf,.png,.jpg,.jpeg" required>
+
+                    <small class="form-text text-muted">
+                        Supported formats: PDF, PNG, JPG and JPEG. Maximum file size: 10 MB.
+                    </small>
+                </div>
+
+                <div class="upload-actions d-flex justify-content-end gap-2 flex-wrap">
+
+                    <a href="{{ url_for('admin_dashboard') }}"
+                       class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+
+                    <button type="submit" class="btn btn-primary">
+                        Analyze & Register Certificate
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,13 @@
+Flask
+Werkzeug
+pytesseract
+Pillow
+pdf2image
+pypdf
+qrcode[pil]
+web3
+python-dotenv
+numpy
+scikit-learn
+joblib
+pytest

@@ -1,0 +1,113 @@
+
+{% extends "base.html" %}
+
+{% block title %}Student Submissions | Admin{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Student Certificate Submissions</h2>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">
+            Back to Dashboard
+        </a>
+    </div>
+
+    {% if submissions %}
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+
+            <thead class="table-dark">
+                <tr>
+                    <th>Student</th>
+                    <th>Course</th>
+                    <th>College</th>
+                    <th>Year</th>
+                    <th>AI Result</th>
+                    <th>Status</th>
+                    <th>Submitted</th>
+                    <th>Certificate</th>
+                    <th>Review</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for submission in submissions %}
+                <tr>
+                    <td>{{ submission.student_name }}</td>
+                    <td>{{ submission.course }}</td>
+                    <td>{{ submission.college }}</td>
+                    <td>{{ submission.year }}</td>
+                    <td>{{ submission.ai_status or "Not available" }}</td>
+
+                    <td>
+                        {% if submission.status == "Pending" %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif submission.status == "Approved" %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+
+                    <td>{{ submission.submitted_at }}</td>
+
+                    <td>
+                        <a href="{{ url_for('admin_view_submission_file', submission_id=submission.id) }}"
+                           target="_blank"
+                           class="btn btn-sm btn-info">
+                            View File
+                        </a>
+                    </td>
+
+                    <td>
+                        {% if submission.status == "Pending" %}
+
+                        <form method="POST"
+                              action="{{ url_for('admin_review_submission', submission_id=submission.id) }}">
+
+                            <textarea name="admin_note"
+                                      class="form-control mb-2"
+                                      placeholder="Optional admin note"
+                                      rows="2"></textarea>
+
+                            <button type="submit"
+                                    name="action"
+                                    value="approve"
+                                    class="btn btn-sm btn-success mb-1">
+                                Approve
+                            </button>
+
+                            <button type="submit"
+                                    name="action"
+                                    value="reject"
+                                    class="btn btn-sm btn-danger mb-1">
+                                Reject
+                            </button>
+
+                        </form>
+
+                        {% else %}
+                            <small>{{ submission.admin_note or "Reviewed" }}</small>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    {% else %}
+
+        <div class="alert alert-info">
+            No student certificate submissions yet.
+        </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,131 @@
+
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header mb-4">
+    <p class="section-label mb-1">STUDENT PORTAL</p>
+    <h2 class="mb-1">My Dashboard</h2>
+    <p class="text-muted mb-0">Welcome, {{ session.get('full_name') }}</p>
+</div>
+
+<div class="card dashboard-card mt-4">
+    <div class="card-body">
+<div class="mb-4">
+    <a href="{{ url_for('student_submit_certificate') }}"
+       class="btn btn-primary">
+        + Register My Certificate
+    </a>
+</div>
+        <div class="mb-4">
+            <h4 class="mb-1">My Certificates</h4>
+            <p class="text-muted small mb-0">
+                View and download your registered academic certificates.
+            </p>
+        </div>
+
+        {% if certificates %}
+
+        <div class="table-responsive">
+            <table class="table dashboard-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Certificate ID</th>
+                        <th>Course</th>
+                        <th>College</th>
+                        <th>Year</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <td class="certificate-id">
+                            {{ cert['certificate_id'] }}
+                        </td>
+
+                        <td>{{ cert['course'] }}</td>
+                        <td>{{ cert['college'] }}</td>
+                        <td>{{ cert['year'] }}</td>
+
+                        <td>
+                            <div class="d-flex flex-wrap gap-2">
+
+                                <a href="{{ url_for('download_certificate', certificate_id=cert['certificate_id']) }}"
+                                   class="btn btn-sm btn-primary">
+                                    Download
+                                </a>
+
+                                <a href="{{ url_for('download_qr', certificate_id=cert['certificate_id']) }}"
+                                   class="btn btn-sm btn-outline-primary">
+                                    QR Code
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h5>No certificates available</h5>
+            <p class="text-muted mb-0">
+                Certificates linked to your account will appear here.
+            </p>
+        </div>
+
+        {% endif %}
+
+    </div>
+    <div class="card dashboard-card mt-4">
+    <div class="card-body">
+        <h4 class="mb-3">My Certificate Submissions</h4>
+
+        {% if submissions %}
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th>Admin Note</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for item in submissions %}
+                    <tr>
+                        <td>{{ item['course'] }}</td>
+                        <td>{{ item['submitted_at'] }}</td>
+                        <td>
+                            <span class="badge
+                                {% if item['status'] == 'Approved' %}bg-success
+                                {% elif item['status'] == 'Rejected' %}bg-danger
+                                {% else %}bg-warning text-dark{% endif %}">
+                                {{ item['status'] }}
+                            </span>
+                        </td>
+                        <td>{{ item['admin_note'] or 'Awaiting review' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted">No certificate submissions yet.</p>
+        {% endif %}
+    </div>
+</div>
+</div>
+
+{% endblock %}

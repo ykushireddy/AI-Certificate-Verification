@@ -1,0 +1,110 @@
+
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+    <div>
+        <p class="section-label mb-1">ADMINISTRATION</p>
+        <h2 class="mb-1">Admin Dashboard</h2>
+        <p class="text-muted mb-0">Welcome, {{ session.get('full_name') }}</p>
+    </div>
+
+    <a href="{{ url_for('upload_certificate') }}" class="btn btn-primary">
+        + Upload Certificate
+    </a>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p class="stat-label">Total Registered Certificates</p>
+            <h2 class="stat-number">{{ total_certificates }}</h2>
+            <p class="stat-description mb-0">Certificates in the system</p>
+        </div>
+    </div>
+</div>
+
+<div class="card dashboard-card">
+    <div class="card-body">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+            <div>
+                <h4 class="mb-1">Registered Certificates</h4>
+                <p class="text-muted small mb-0">Manage and verify issued certificates</p>
+            </div>
+        </div>
+
+        {% if certificates %}
+
+        <div class="table-responsive">
+            <table class="table dashboard-table align-middle mb-0">
+
+                <thead>
+                    <tr>
+                        <th>Certificate ID</th>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Year</th>
+                        <th>AI Check</th>
+                        <th>Blockchain Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for cert in certificates %}
+                    <tr>
+                        <td class="certificate-id">
+                            {{ cert['certificate_id'] }}
+                        </td>
+
+                        <td>{{ cert['student_name'] }}</td>
+                        <td>{{ cert['course'] }}</td>
+                        <td>{{ cert['year'] }}</td>
+                        <td>
+                            {% if cert['ai_status'] %}
+                            <span class="ai-badge ai-{{ cert['ai_status']|lower|replace(' ', '-') }}">{{ cert['ai_status'] }} ({{ cert['ai_risk_score'] }})</span>
+                            {% else %}-{% endif %}
+                        </td>
+
+                        <td>
+                            {% if cert['blockchain_tx'] %}
+                            <span class="status-registered">Registered</span>
+                            {% else %}
+                            <span class="status-pending">Pending</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for('verify_by_id', certificate_id=cert['certificate_id']) }}"
+                               class="btn btn-sm btn-outline-primary">
+                                Verify
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+
+            </table>
+        </div>
+
+        {% else %}
+
+        <div class="empty-state">
+            <h5>No certificates registered</h5>
+            <p class="text-muted mb-0">Uploaded certificates will appear here.</p>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+<div class="mb-4">
+    <a href="{{ url_for('admin_submissions') }}" class="btn btn-primary">
+        Review Student Submissions
+    </a>
+</div>
+{% endblock %}

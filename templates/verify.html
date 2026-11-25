@@ -1,0 +1,81 @@
+
+{% extends "base.html" %}
+
+{% block title %}Verify Certificate | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="verification-page">
+
+    <div class="dashboard-header text-center mb-4">
+        <p class="section-label mb-2">PUBLIC VERIFICATION PORTAL</p>
+        <h2>Certificate Verification</h2>
+        <p class="text-muted">
+            Verify the authenticity of an academic certificate using its unique ID or original document.
+        </p>
+    </div>
+
+    <div class="card dashboard-card verification-card">
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <div class="form-section">
+                    <h5 class="form-section-title">01. Verify Using Certificate ID</h5>
+
+                    <p class="text-muted small mb-3">
+                        Enter the unique ID provided with the registered certificate.
+                    </p>
+
+                    <label class="form-label">Certificate ID</label>
+
+                    <input
+                        type="text"
+                        name="certificate_id"
+                        class="form-control"
+                        placeholder="Example: CERT-123456"
+                    >
+                </div>
+
+                <div class="verification-divider">
+                    <span>OR</span>
+                </div>
+
+                <div class="form-section">
+                    <h5 class="form-section-title">02. Verify Using Certificate File</h5>
+
+                    <p class="text-muted small mb-3">
+                        Upload the original certificate document for verification.
+                    </p>
+
+                    <label class="form-label">Select Certificate</label>
+
+                    <input
+                        type="file"
+                        name="certificate"
+                        class="form-control"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                    >
+
+                    <small class="form-text text-muted">
+                        Supported formats: PDF, PNG, JPG and JPEG.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    Verify Certificate
+                </button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <p class="verification-note text-center">
+        VeriCred AI uses OCR analysis and blockchain-based hash verification
+        to help assess certificate authenticity.
+    </p>
+
+</div>
+
+{% endblock %}

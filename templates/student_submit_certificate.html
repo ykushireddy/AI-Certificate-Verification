@@ -1,0 +1,101 @@
+
+{% extends "base.html" %}
+
+{% block title %}Register Certificate | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="dashboard-header mb-4">
+    <p class="section-label mb-1">STUDENT PORTAL</p>
+    <h2 class="mb-1">Register My Certificate</h2>
+    <p class="text-muted">
+        Submit your academic certificate for verification.
+    </p>
+</div>
+
+<div class="card dashboard-card">
+    <div class="card-body p-4">
+
+        <form method="POST"
+              action="{{ url_for('student_submit_certificate') }}"
+              enctype="multipart/form-data">
+
+            <div class="mb-3">
+                <label class="form-label">Student Name</label>
+                <input type="text"
+                       class="form-control"
+                       value="{{ session.get('full_name') }}"
+                       readonly>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Course Name</label>
+                <input type="text"
+                       name="course"
+                       class="form-control"
+                       placeholder="Example: Introduction to Cyber Security"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">College / Institution</label>
+                <input type="text"
+                       name="college"
+                       class="form-control"
+                       placeholder="Enter your college name"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Year of Issue</label>
+                <input type="number"
+                       name="year"
+                       class="form-control"
+                       min="1950"
+                       max="2100"
+                       placeholder="2026"
+                       required>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Register Number</label>
+                <input type="text"
+                       name="register_number"
+                       class="form-control"
+                       placeholder="Enter your register number">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Upload Certificate</label>
+                <input type="file"
+                       name="certificate"
+                       class="form-control"
+                       accept=".pdf,.png,.jpg,.jpeg"
+                       required>
+                <small class="text-muted">
+                    Accepted formats: PDF, PNG, JPG and JPEG. Maximum size: 10 MB.
+                </small>
+            </div>
+
+            <div class="alert alert-info">
+                Your certificate will be reviewed by the administrator.
+                It will not be registered on the blockchain until approved.
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    Submit for Review
+                </button>
+
+                <a href="{{ url_for('student_dashboard') }}"
+                   class="btn btn-outline-secondary">
+                    Cancel
+                </a>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,251 @@
+
+{% extends "base.html" %}
+
+{% block title %}Verification Result | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="result-page">
+
+    <div class="dashboard-header text-center mb-4">
+        <p class="section-label mb-2">VERIFICATION REPORT</p>
+        <h2>Certificate Verification Result</h2>
+        <p class="text-muted">Review the certificate verification and blockchain details below.</p>
+    </div>
+
+    <div class="card dashboard-card result-card">
+        <div class="card-body">
+
+            {% if result == "VERIFIED" or result == "REGISTERED" %}
+                <div class="result-status result-success">
+                    <h3>✓ {{ result }}</h3>
+                    <p class="mb-0">The certificate is registered and its hash matches the blockchain record.</p>
+                </div>
+
+            {% elif result == "TAMPERED-MISMATCH" %}
+                <div class="result-status result-danger">
+                    <h3>✕ TAMPERED / HASH MISMATCH</h3>
+                    <p class="mb-0">The uploaded file does not match a registered certificate.</p>
+                </div>
+
+            {% else %}
+                <div class="result-status result-warning">
+                    <h3>Certificate Not Found</h3>
+                    <p class="mb-0">No matching registered certificate was found.</p>
+                </div>
+            {% endif %}
+
+            <div class="result-section">
+                <h5 class="result-section-title">01. Certificate Information</h5>
+
+                <div class="result-details">
+                    <div>
+                        <span>Certificate ID</span>
+                        <strong>{{ certificate_id or "Not available" }}</strong>
+                    </div>
+
+                    {% if certificate %}
+                    <div>
+                        <span>Student Name</span>
+                        <strong>{{ certificate['student_name'] }}</strong>
+                    </div>
+                    <div>
+                        <span>Course</span>
+                        <strong>{{ certificate['course'] }}</strong>
+                    </div>
+                    <div>
+                        <span>College</span>
+                        <strong>{{ certificate['college'] }}</strong>
+                    </div>
+                    <div>
+                        <span>Year</span>
+                        <strong>{{ certificate['year'] }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if blockchain %}
+            <div class="result-section">
+                <h5 class="result-section-title">02. Blockchain Information</h5>
+
+                <div class="result-details">
+                    <div>
+                        <span>Blockchain Status</span>
+                        <strong>{{ blockchain['status'] }}</strong>
+                    </div>
+
+                    {% if blockchain.get('certificate_hash') %}
+                    <div class="result-full-width">
+                        <span>Registered SHA-256 Hash</span>
+                        <p class="hash-text">{{ blockchain['certificate_hash'] }}</p>
+                    </div>
+                    <div class="result-full-width">
+                        <span>Issuer Wallet Address</span>
+                        <p class="hash-text">{{ blockchain['issuer'] }}</p>
+                    </div>
+                    <div>
+                        <span>Timestamp</span>
+                        <strong>{{ blockchain['timestamp'] }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if closest_match %}
+            <div class="ai-closest">
+                <strong>AI match:</strong> this file is not registered, but it closely resembles
+                certificate <strong>{{ closest_match['certificate_id'] }}</strong>
+                issued to <strong>{{ closest_match['student_name'] }}</strong>
+                ({{ closest_score }}% content match). It is probably an altered copy -
+                see the differences highlighted below.
+            </div>
+            {% endif %}
+
+            {% if certificate and not analysis and certificate['ai_status'] %}
+            <div class="result-section">
+                <h5 class="result-section-title">03. AI Analysis at Issue Time</h5>
+                <div class="result-details">
+                    <div>
+                        <span>AI Status</span>
+                        <strong class="ai-badge ai-{{ certificate['ai_status']|lower|replace(' ', '-') }}">{{ certificate['ai_status'] }}</strong>
+                    </div>
+                    <div>
+                        <span>Risk Score</span>
+                        <strong>{{ certificate['ai_risk_score'] }} / 100</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            {% if analysis %}
+            {% set risk = analysis['risk_score'] %}
+            {% set level = 'high' if risk >= 60 else ('medium' if risk >= 35 else 'low') %}
+            <div class="result-section">
+                <h5 class="result-section-title">03. AI Analysis</h5>
+
+                <div class="ai-summary ai-level-{{ level }}">
+                    <div class="ai-score">
+                        <span class="ai-score-number">{{ risk }}</span>
+                        <span class="ai-score-label">Risk score / 100</span>
+                    </div>
+                    <div class="ai-summary-text">
+                        <strong>{{ analysis['status'] }} - {{ analysis['verdict'] }}</strong>
+                        <div class="ai-meter"><div style="width: {{ risk }}%"></div></div>
+                        <small class="text-muted">{{ analysis['analysis_type'] }}</small>
+                    </div>
+                </div>
+
+                {% set check_names = {
+                    'text_model': 'ML text classifier',
+                    'forensics': 'Document forensics',
+                    'field_match': 'Field mismatch',
+                    'rules': 'Rule checks'
+                } %}
+                <p class="result-label mt-3">Individual Checks (higher = more suspicious)</p>
+                <div class="ai-checks">
+                    {% for name, value in analysis['check_scores'].items() %}
+                    <div class="ai-check">
+                        <span>{{ check_names.get(name, name) }}</span>
+                        <div class="ai-bar"><div class="{{ 'bar-high' if value >= 60 else ('bar-medium' if value >= 35 else 'bar-low') }}" style="width: {{ [value, 2]|max }}%"></div></div>
+                        <strong>{{ value }}%</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% set matching = analysis['components'].get('field_match') %}
+                {% if matching and matching['fields'] %}
+                <p class="result-label mt-4">Record vs. Document (fuzzy OCR match)</p>
+                <table class="table table-sm ai-table">
+                    <thead>
+                        <tr><th>Field</th><th>On record</th><th>Found on document</th><th>Match</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for key, item in matching['fields'].items() %}
+                        <tr class="{{ '' if item['matched'] else 'ai-row-mismatch' }}">
+                            <td>{{ item['label'] }}</td>
+                            <td>{{ item['expected'] }}</td>
+                            <td>{{ item['found'] or '-' }}</td>
+                            <td>{{ '✓' if item['matched'] else '✕' }} {{ item['score'] }}%</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% endif %}
+
+                {% set text_model = analysis['components'].get('text_model') %}
+                {% if text_model and text_model['signals'] %}
+                <p class="result-label mt-3">Words that raised the ML model's suspicion</p>
+                <div class="ai-signals">
+                    {% for signal in text_model['signals'] %}<span>{{ signal }}</span>{% endfor %}
+                </div>
+                {% endif %}
+
+                {% set forensic = analysis['components'].get('forensics') %}
+                {% if forensic and forensic['heatmap'] %}
+                <p class="result-label mt-4">Error Level Analysis heatmap ({{ forensic['method'] }})</p>
+                <img class="ai-heatmap" src="data:image/png;base64,{{ forensic['heatmap'] }}" alt="Error level analysis heatmap">
+                <small class="text-muted d-block mt-1">Red areas have a different compression history from the rest of the page and may have been edited. Ordinary text edges show faint red too - look for one region that stands out.</small>
+                {% endif %}
+
+                <p class="result-label mt-4">Extracted Fields</p>
+                <div class="analysis-list">
+                    {% for key, value in analysis['fields'].items() %}
+                    <div>
+                        <span>{{ key.replace('_', ' ').title() }}</span>
+                        <strong>{{ value or "Not detected" }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if analysis['warnings'] %}
+                <div class="result-warnings mt-3">
+                    <strong>AI Findings</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for warning in analysis['warnings'] %}
+                        <li>{{ warning }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if extracted_text %}
+            <div class="result-section">
+                <h5 class="result-section-title">04. OCR Extracted Text</h5>
+                <pre class="ocr-text">{{ extracted_text }}</pre>
+            </div>
+            {% endif %}
+
+            {% if result == "REGISTERED" and certificate_hash %}
+            <div class="result-section">
+                <h5 class="result-section-title">05. Registration Details</h5>
+
+                <span class="result-label">Certificate SHA-256 Hash</span>
+                <p class="hash-text">{{ certificate_hash }}</p>
+
+                <div class="result-details">
+                    <div class="result-full-width">
+                        <span>Blockchain Transaction</span>
+                        <p class="hash-text">{{ blockchain['transaction_hash'] }}</p>
+                    </div>
+                    <div>
+                        <span>Block Number</span>
+                        <strong>{{ blockchain['block_number'] }}</strong>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="result-actions">
+                <a href="{{ url_for('verify') }}" class="btn btn-primary">Verify Another Certificate</a>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-secondary">Home</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

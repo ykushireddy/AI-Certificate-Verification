@@ -1,0 +1,34 @@
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+.env.*
+
+# Keep the example environment file
+!.env.example
+
+# Node
+node_modules/
+
+# Uploaded certificates and QR codes
+uploads/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Editor and OS files
+.vscode/
+.DS_Store
+# Generated blockchain files
+artifacts/
+cache/
+deployments/
+localhost.json
+
+# Local demo files
+screenrecordings/
+test_certificate.png

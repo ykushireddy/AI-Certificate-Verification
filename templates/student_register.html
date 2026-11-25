@@ -1,0 +1,81 @@
+
+{% extends "base.html" %}
+
+{% block title %}Student Registration | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<div class="login-page">
+
+    <div class="card login-card">
+
+        <div class="login-heading text-center">
+            <p class="section-label mb-2">STUDENT PORTAL</p>
+            <h2>Create Your Account</h2>
+            <p class="text-muted">Register to access your academic certificates.</p>
+        </div>
+
+        <form method="POST" action="{{ url_for('student_register') }}">
+
+            <div class="mb-3">
+                <label class="form-label">Full Name</label>
+                <input
+                    type="text"
+                    name="full_name"
+                    class="form-control"
+                    placeholder="Enter your full name"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input
+                    type="text"
+                    name="username"
+                    class="form-control"
+                    placeholder="Choose a username"
+                    required
+                >
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <input
+                    type="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="Create a password"
+                    minlength="8"
+                    required
+                >
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Confirm Password</label>
+                <input
+                    type="password"
+                    name="confirm_password"
+                    class="form-control"
+                    placeholder="Re-enter your password"
+                    minlength="8"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Create Account
+            </button>
+
+        </form>
+
+        <div class="login-footer text-center mt-4">
+            Already have an account?
+            <a href="{{ url_for('login') }}">Sign In</a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

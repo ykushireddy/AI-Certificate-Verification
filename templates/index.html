@@ -1,0 +1,65 @@
+
+{% extends "base.html" %}
+
+{% block title %}Home | VeriCred AI{% endblock %}
+
+{% block content %}
+
+<section class="welcome-hero">
+
+    <div class="welcome-content">
+
+        <p class="section-label">WELCOME TO VERICRED AI</p>
+
+        <h1>
+            Verify Academic<br>
+            Credentials with<br>
+            <span>Confidence.</span>
+        </h1>
+
+        <p class="welcome-description">
+            A simple and reliable platform to check the authenticity
+            of academic certificates.
+        </p>
+
+        <div class="welcome-actions">
+
+            <a href="{{ url_for('verify') }}" class="btn btn-primary">
+                Verify a Certificate
+            </a>
+
+            {% if not session.get('user_id') %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline-primary">
+                    Sign In
+                </a>
+            {% elif session.get('role') == 'admin' %}
+                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-primary">
+                    Admin Dashboard
+                </a>
+            {% elif session.get('role') == 'student' %}
+                <a href="{{ url_for('student_dashboard') }}" class="btn btn-outline-primary">
+                    My Certificates
+                </a>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    <div class="welcome-visual">
+        <div class="visual-circle visual-circle-one"></div>
+        <div class="visual-circle visual-circle-two"></div>
+
+        <div class="welcome-icon">
+            <div class="shield-icon">✓</div>
+        </div>
+
+        <div class="visual-caption">
+            <span class="caption-dot"></span>
+            Academic Credentials
+        </div>
+    </div>
+
+</section>
+
+{% endblock %}
