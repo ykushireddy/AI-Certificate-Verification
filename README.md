@@ -55,7 +55,7 @@ Default logins: admin / admin123, student / student123.
 
 Run the tests: `python -m pytest tests`
 
-## Limitations (worth stating in a viva)
+## Limitations 
 
 - The text classifier's starting dataset is **synthetic** (generated genuine and forged
   certificate texts). It improves as real issued certificates are added via `train_model.py`.
